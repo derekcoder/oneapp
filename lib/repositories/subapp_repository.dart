@@ -13,13 +13,13 @@ class SubappRepository extends ChangeNotifier {
 
   void _init() {
     _subapps.addAll([
-      PhotoEditorSubapp(
-        name: 'Photo Editor',
-        color: Colors.redAccent,
-      ),
       ChatGPTSubapp(
         name: 'Chat-GPT',
         color: Colors.blueAccent,
+      ),
+      PhotoEditorSubapp(
+        name: 'Photo Editor',
+        color: Colors.redAccent,
       ),
     ]);
   }
