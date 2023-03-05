@@ -8,4 +8,6 @@ abstract class Subapp {
 
   final String name;
   final Color color;
+
+  Widget get homePage;
 }

@@ -6,14 +6,14 @@ import 'package:http/http.dart' as http;
 import 'backend_exception.dart';
 
 class HttpHeaders {
-  static const accountKey = 'AccountKey';
   static const authorizationKey = 'Authorization';
+  static const acceptKey = 'Accept';
+  static const contentTypeKey = 'Content-Type';
 }
 
-const _accountKeyCredential = 'D3JfbERPSWiI+dp06Bh8nQ==';
-
 class BackendQuery {
-  static Uri generateApiUri(String endpoint, Map<String, dynamic> parameters) {
+  static Uri generateApiUri(String endpoint,
+      [Map<String, dynamic>? parameters]) {
     return Uri.https('api.openai.com', endpoint, parameters);
   }
 
@@ -39,34 +39,6 @@ class BackendQuery {
     return json;
   }
 
-  /// Backend query using http get method.
-  ///
-  /// Returns a json value map of backend response.
-  /// Throws [BackendException], if the json contains error status.
-  static Future<Map<String, dynamic>> httpGet(
-    String endpoint, {
-    Map<String, dynamic> parameters = const {},
-    Map<String, dynamic>? additionalHeaders,
-  }) async {
-    try {
-      // http://datamall2.mytransport.sg/ltaodataservice/BusStops
-      final response = await http.get(
-        generateApiUri(endpoint, parameters),
-        headers: {
-          HttpHeaders.accountKey: _accountKeyCredential,
-          ...?additionalHeaders,
-        },
-      );
-      _validateHttpResponse(response);
-      return _decodeResponse(response.body);
-    } on SocketException catch (e) {
-      throw BackendException(
-        type: BackendExceptionType.networkIssue,
-        detail: '$e',
-      );
-    }
-  }
-
   /// Backend query using http post method.
   ///
   /// Returns a json value map of backend response.
@@ -79,10 +51,12 @@ class BackendQuery {
     try {
       // http://datamall2.mytransport.sg/ltaodataservice/BusStops
       final response = await http.post(
-        generateApiUri(endpoint, parameters),
+        generateApiUri(endpoint),
         headers: {
           HttpHeaders.authorizationKey:
-              'Bearer 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',
+              'Bearer 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',
+          HttpHeaders.acceptKey: 'application/json',
+          HttpHeaders.contentTypeKey: 'application/json',
           ...?additionalHeaders,
         },
         body: jsonEncode(parameters),

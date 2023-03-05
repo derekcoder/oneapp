@@ -2,21 +2,6 @@ import 'backend_exception.dart';
 import 'backend_query.dart';
 
 class BaseApi {
-  /// Sends http get query with the current user token.
-  ///
-  /// Returns an empty result if failed.
-  Future<Map<String, dynamic>> userHttpGet(
-    String endpoint, [
-    Map<String, dynamic> parameters = const {},
-  ]) async {
-    return _callAndRetry(
-      () => BackendQuery.httpGet(
-        endpoint,
-        parameters: parameters,
-      ),
-    );
-  }
-
   /// Sends http post
   ///
   /// Returns an empty result if failed.

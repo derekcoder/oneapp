@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ONEAPP'),
+        title: const Text('OneTool'),
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(12),
@@ -25,7 +25,12 @@ class HomePage extends StatelessWidget {
         itemCount: subapps.length,
         itemBuilder: (context, index) => _SubappTile(
           subapp: subapps[index],
-          onTap: () {},
+          onTap: () {
+            final route = MaterialPageRoute(
+              builder: (_) => subapps[index].homePage,
+            );
+            Navigator.push(context, route);
+          },
         ),
       ),
     );

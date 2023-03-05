@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:oneapp/models/subapp.dart';
 
 class PhotoEditorSubapp extends Subapp {
@@ -5,4 +6,7 @@ class PhotoEditorSubapp extends Subapp {
     required super.name,
     required super.color,
   });
+
+  @override
+  Widget get homePage => Container();
 }

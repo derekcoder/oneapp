@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:oneapp/home_page.dart';
+import 'package:oneapp/services/backend/chatgpt_api.dart';
+import 'package:oneapp/ui/home_page.dart';
 import 'package:oneapp/repositories/subapp_repository.dart';
 import 'package:provider/provider.dart';
 
@@ -15,10 +16,11 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: SubappRepository()),
+        Provider.value(value: ChatgptApi()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
-          title: 'ONEAPP',
+          title: 'OneTool',
           theme: ThemeData(
             primarySwatch: Colors.blue,
             appBarTheme: const AppBarTheme(
