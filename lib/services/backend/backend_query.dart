@@ -54,7 +54,7 @@ class BackendQuery {
         generateApiUri(endpoint),
         headers: {
           HttpHeaders.authorizationKey:
-              'Bearer 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',
+              'Bearer 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',
           HttpHeaders.acceptKey: 'application/json',
           HttpHeaders.contentTypeKey: 'application/json',
           ...?additionalHeaders,
