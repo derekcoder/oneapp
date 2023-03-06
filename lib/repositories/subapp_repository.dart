@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oneapp/models/chatgpt_subapp.dart';
-import 'package:oneapp/models/photo_editor_subapp.dart';
 import 'package:oneapp/models/subapp.dart';
 
 class SubappRepository extends ChangeNotifier {
@@ -16,10 +15,6 @@ class SubappRepository extends ChangeNotifier {
       ChatGPTSubapp(
         name: 'Chat-GPT',
         color: Colors.blueAccent,
-      ),
-      PhotoEditorSubapp(
-        name: 'Photo Editor',
-        color: Colors.redAccent,
       ),
     ]);
   }

@@ -31,6 +31,12 @@ class _ChatgptView extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Chat-GPT'),
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.settings),
+              ),
+            ],
           ),
           body: viewModel.apiKey == null
               ? const _SetApiKeyView()
