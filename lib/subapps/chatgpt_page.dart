@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:oneapp/models/chat.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
@@ -37,9 +38,10 @@ class _ChatgptView extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
-                        vertical: 6,
                       ),
                       child: TextField(
+                        enabled: !viewModel.sending,
+                        textCapitalization: TextCapitalization.sentences,
                         controller: viewModel.chatController,
                         decoration: const InputDecoration(
                           // border: OutlineInputBorder(),
@@ -48,15 +50,21 @@ class _ChatgptView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => viewModel.askQuestion(),
-                    icon: const Icon(Icons.send_rounded),
+                  SizedBox(
+                    width: 40,
+                    child: viewModel.sending
+                        ? const CupertinoActivityIndicator()
+                        : IconButton(
+                            onPressed: () => viewModel.askQuestion(),
+                            icon: const Icon(Icons.send_rounded),
+                          ),
                   ),
                 ],
               ),
               // const Divider(),
               Expanded(
                 child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   itemCount: viewModel.chats.length,
                   itemBuilder: (context, index) {
                     final chat = viewModel.chats[index];
@@ -95,15 +103,21 @@ class _ViewModel extends ViewModel {
   final _chats = <Chat>[];
   List<Chat> get chats => List.unmodifiable(_chats.reversed);
 
+  bool _sending = false;
+  bool get sending => _sending;
+
   Future<void> askQuestion() async {
     final content = chatController.text;
     final question = Chat(role: Role.user, content: content);
     _chats.add(question);
     chatController.text = '';
+    _sending = true;
+
     notifyListeners();
 
     final answer = await api.ask(_chats);
     _chats.add(answer);
+    _sending = false;
     notifyListeners();
   }
 }
