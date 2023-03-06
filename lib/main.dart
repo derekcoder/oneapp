@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
+import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/ui/home_page.dart';
 import 'package:oneapp/repositories/subapp_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final prefs = await SharedPreferences.getInstance();
+  final appPref = AppPreference(prefs);
+
+  runApp(
+    MyApp(
+      appPref: appPref,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    required this.appPref,
+  });
+
+  final AppPreference appPref;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +33,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: SubappRepository()),
         Provider.value(value: ChatgptApi()),
+        Provider.value(value: appPref),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
