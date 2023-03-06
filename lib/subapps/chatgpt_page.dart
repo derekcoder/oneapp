@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:oneapp/models/chat.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
@@ -6,6 +7,7 @@ import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/subapps/settings_page.dart';
 import 'package:oneapp/subapps/view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatgptPage extends StatelessWidget {
   const ChatgptPage({super.key});
@@ -138,7 +140,7 @@ class _SetApiKeyView extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               Text(
-                'Welcome to Chat-GPT bot. You need a ChatGPT API key to continue.',
+                'Welcome to Chat-GPT bot. You need a Chat-GPT API key to continue.',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 20),
@@ -160,13 +162,43 @@ class _SetApiKeyView extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        children: [
+                          const TextSpan(text: '1. Open '),
+                          TextSpan(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () async {
+                                await launchUrl(
+                                  Uri.parse(
+                                      'https://platform.openai.com/account/api-keys'),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              },
+                            text:
+                                'https://platform.openai.com/account/api-keys',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     Text(
-                        '1. Open https://platform.openai.com/account/api-keys.'),
-                    SizedBox(height: 12),
-                    Text('2. Click "Create new secret key".'),
-                    SizedBox(height: 12),
-                    Text('3. Copy & Paste your API key.'),
+                      '2. Click "Create new secret key"',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '3. Copy & Paste your API key',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ],
                 ),
               ),
