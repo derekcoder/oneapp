@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/ui/home_page.dart';
@@ -6,7 +7,7 @@ import 'package:oneapp/repositories/subapp_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
@@ -40,8 +41,9 @@ class MyApp extends StatelessWidget {
           title: 'OneTool',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            primarySwatch: Colors.green,
             appBarTheme: const AppBarTheme(
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               elevation: 0,
             ),
             scaffoldBackgroundColor: Colors.grey[200],
