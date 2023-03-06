@@ -1,11 +1,19 @@
 import 'package:oneapp/models/chat.dart';
-import 'package:oneapp/services/backend/base_api.dart';
 
-class ChatgptApi extends BaseApi {
+import 'backend_query.dart';
+
+class ChatgptApi {
+  ChatgptApi(this._apiKey);
+
+  String _apiKey = '';
+
+  void updateApiKey(String value) => _apiKey = value;
+
   Future<Chat> ask(List<Chat> chats) async {
-    final response = await userHttpPost(
+    final response = await BackendQuery.httpPost(
       'v1/chat/completions',
-      {
+      apiKey: _apiKey,
+      parameters: {
         'model': 'gpt-3.5-turbo',
         'stream': false,
         'messages': [

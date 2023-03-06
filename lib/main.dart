@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: SubappRepository()),
-        Provider.value(value: ChatgptApi()),
         Provider.value(value: appPref),
+        Provider.value(value: ChatgptApi(appPref.apiKey)),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(

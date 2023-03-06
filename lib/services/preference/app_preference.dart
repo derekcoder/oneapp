@@ -10,12 +10,6 @@ class AppPreference {
   final SharedPreferences _prefs;
 
   static const _keyApiKey = 'apiKey';
-  String? get apiKey => _prefs.getString(_keyApiKey);
-  set apiKey(String? value) {
-    if (value == null) {
-      _prefs.remove(_keyApiKey);
-    } else {
-      _prefs.setString(_keyApiKey, value);
-    }
-  }
+  String get apiKey => _prefs.getString(_keyApiKey) ?? '';
+  set apiKey(String value) => _prefs.setString(_keyApiKey, value);
 }

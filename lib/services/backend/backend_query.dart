@@ -11,6 +11,10 @@ class HttpHeaders {
   static const contentTypeKey = 'Content-Type';
 }
 
+class HttpHeaderValues {
+  static const appJson = 'application/json';
+}
+
 class BackendQuery {
   static Uri generateApiUri(String endpoint,
       [Map<String, dynamic>? parameters]) {
@@ -45,18 +49,17 @@ class BackendQuery {
   /// Throws [BackendException], if the json contains error status.
   static Future<Map<String, dynamic>> httpPost(
     String endpoint, {
+    required String apiKey,
     Map<String, dynamic> parameters = const {},
     Map<String, dynamic>? additionalHeaders,
   }) async {
     try {
-      // http://datamall2.mytransport.sg/ltaodataservice/BusStops
       final response = await http.post(
         generateApiUri(endpoint),
         headers: {
-          HttpHeaders.authorizationKey:
-              'Bearer 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',
-          HttpHeaders.acceptKey: 'application/json',
-          HttpHeaders.contentTypeKey: 'application/json',
+          HttpHeaders.authorizationKey: 'Bearer $apiKey',
+          HttpHeaders.acceptKey: HttpHeaderValues.appJson,
+          HttpHeaders.contentTypeKey: HttpHeaderValues.appJson,
           ...?additionalHeaders,
         },
         body: jsonEncode(parameters),

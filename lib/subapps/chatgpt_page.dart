@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oneapp/models/chat.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
+import 'package:oneapp/subapps/settings_page.dart';
 import 'package:oneapp/subapps/view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -32,13 +33,19 @@ class _ChatgptView extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Chat-GPT'),
             actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.settings),
-              ),
+              if (viewModel.apiKey.isNotEmpty)
+                IconButton(
+                  onPressed: () {
+                    final route = MaterialPageRoute(
+                      builder: (_) => const SettingsPage(),
+                    );
+                    Navigator.push(context, route);
+                  },
+                  icon: const Icon(Icons.settings),
+                ),
             ],
           ),
-          body: viewModel.apiKey == null
+          body: viewModel.apiKey.isEmpty
               ? const _SetApiKeyView()
               : const _ChatView(),
         );
@@ -79,7 +86,9 @@ class _ChatView extends StatelessWidget {
                   child: viewModel.sending
                       ? const CupertinoActivityIndicator()
                       : IconButton(
-                          onPressed: () => viewModel.askQuestion(),
+                          onPressed: viewModel.chatController.text.isEmpty
+                              ? null
+                              : viewModel.askQuestion,
                           icon: const Icon(Icons.send_rounded),
                         ),
                 ),
@@ -164,7 +173,7 @@ class _SetApiKeyView extends StatelessWidget {
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 44,
                 child: ElevatedButton(
                   onPressed: viewModel.apiKeyController.text.isEmpty
                       ? null
@@ -191,7 +200,8 @@ class _ViewModel extends ViewModel {
 
   late final apiKeyController = TextEditingController()
     ..addListener(notifyListeners);
-  final chatController = TextEditingController();
+  late final chatController = TextEditingController()
+    ..addListener(notifyListeners);
 
   final _chats = <Chat>[];
   List<Chat> get chats => List.unmodifiable(_chats.reversed);
@@ -199,11 +209,13 @@ class _ViewModel extends ViewModel {
   bool _sending = false;
   bool get sending => _sending;
 
-  String? get apiKey => appPref.apiKey;
+  String get apiKey => appPref.apiKey;
 
   void setApiKey() {
     final apiKey = apiKeyController.text;
     appPref.apiKey = apiKey;
+    api.updateApiKey(apiKey);
+
     notifyListeners();
   }
 
