@@ -26,13 +26,9 @@ class BackendQuery {
   /// For example 404 not found (offline).
   static void _validateHttpResponse(http.Response response) {
     if (response.statusCode != 200) {
-      print('http error ${response.statusCode}');
-
-      throw BackendException(
-        type: (response.statusCode == 500)
-            ? BackendExceptionType.internalError
-            : BackendExceptionType.networkIssue,
-        detail: 'http status : ${response.statusCode}',
+      throw BackendException.statusCode(
+        response.statusCode,
+        'http status : ${response.statusCode}',
       );
     }
   }

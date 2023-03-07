@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:oneapp/models/message.dart';
+import 'package:oneapp/services/backend/backend_exception.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/subapps/settings_page.dart';
@@ -33,6 +34,13 @@ class _ChatgptView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<_ViewModel>(
       builder: (context, viewModel, _) {
+        viewModel.onApiIssue =
+            (message) => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                  ),
+                );
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('Chat-GPT'),
@@ -287,6 +295,8 @@ class _ViewModel extends ViewModel {
   final AppPreference appPref;
   final ChatgptApi api;
 
+  void Function(String)? onApiIssue;
+
   late final apiKeyController = TextEditingController()
     ..addListener(notifyListeners);
   late final chatController = TextEditingController()
@@ -310,20 +320,50 @@ class _ViewModel extends ViewModel {
 
   Future<void> sendMessage() async {
     final content = chatController.text;
-    final question = Message(
+
+    final message = Message(
       role: Role.user,
       content: content,
       date: DateTime.now(),
     );
-    _messages.add(question);
+
+    _messages.add(message);
     chatController.text = '';
     _sending = true;
-
     notifyListeners();
 
-    final answer = await api.send(_messages);
-    _messages.add(answer);
+    final answer = await _send(_messages);
+
+    if (answer != null) {
+      _messages.add(answer);
+    }
     _sending = false;
     notifyListeners();
+  }
+
+  Future<Message?> _send(List<Message> messages) async {
+    try {
+      final answer = await api.send(messages);
+      return answer;
+    } on BackendException catch (e) {
+      final String message;
+      switch (e.type) {
+        case BackendExceptionType.networkIssue:
+          message = 'Got an internet issue';
+          break;
+        case BackendExceptionType.unauthorized:
+          message = 'Unauthorized';
+          break;
+        case BackendExceptionType.internalError:
+          message = 'Something errors happen in server';
+          break;
+        case BackendExceptionType.unknown:
+          message = 'There is unknown error';
+          break;
+      }
+      onApiIssue?.call(message);
+    }
+
+    return null;
   }
 }
