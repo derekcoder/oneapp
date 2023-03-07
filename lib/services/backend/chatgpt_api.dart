@@ -1,4 +1,4 @@
-import 'package:oneapp/models/chat.dart';
+import 'package:oneapp/models/message.dart';
 
 import 'backend_query.dart';
 
@@ -9,7 +9,7 @@ class ChatgptApi {
 
   void updateApiKey(String value) => _apiKey = value;
 
-  Future<Chat> ask(List<Chat> chats) async {
+  Future<Message> send(List<Message> chats) async {
     final response = await BackendQuery.httpPost(
       'v1/chat/completions',
       apiKey: _apiKey,
@@ -23,7 +23,7 @@ class ChatgptApi {
     );
 
     final choices = response['choices'] as List<dynamic>;
-    final chat = Chat.fromJson(choices.first['message']);
+    final chat = Message.fromJson(choices.first['message']);
     return chat;
   }
 }

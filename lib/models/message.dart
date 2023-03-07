@@ -1,13 +1,15 @@
-class Chat {
-  Chat({required this.content, required this.role});
+class Message {
+  Message({required this.content, required this.role, required this.date});
 
   final String content;
   final Role role;
+  final DateTime date;
 
-  factory Chat.fromJson(Map<String, dynamic> json) {
-    return Chat(
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
       content: json['content'] as String,
       role: json['role'] == 'user' ? Role.user : Role.assistant,
+      date: DateTime.now(),
     );
   }
 

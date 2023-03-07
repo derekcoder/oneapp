@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:oneapp/models/chat.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:oneapp/models/message.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/subapps/settings_page.dart';
@@ -69,7 +71,7 @@ class _ChatView extends StatelessWidget {
           children: [
             _buildChatInputView(viewModel),
             Expanded(
-              child: _buildChatConversationsList(viewModel),
+              child: _buildMessagesList(context, viewModel),
             ),
           ],
         );
@@ -77,23 +79,59 @@ class _ChatView extends StatelessWidget {
     );
   }
 
-  Widget _buildChatConversationsList(_ViewModel viewModel) {
+  Widget _buildMessagesList(BuildContext context, _ViewModel viewModel) {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: viewModel.chats.length,
+      itemCount: viewModel.messages.length,
       itemBuilder: (context, index) {
-        final chat = viewModel.chats[index];
+        final message = viewModel.messages[index];
         return ListTile(
           leading: SizedBox(
-            width: 70,
-            child: Text(
-              chat.role.name,
-              style: TextStyle(
-                color: Colors.grey[600],
-              ),
+            width: 64,
+            child: Column(
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  message.role.name,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
           ),
-          title: Text(chat.content),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    DateFormat.Hms().format(message.date),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText2
+                        ?.copyWith(color: Colors.grey),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: message.content.trim()),
+                      );
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Copied to clipboard"),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                  ),
+                ],
+              ),
+              Text(message.content.trim()),
+            ],
+          ),
         );
       },
       separatorBuilder: (BuildContext context, int index) => const Divider(),
@@ -103,19 +141,15 @@ class _ChatView extends StatelessWidget {
   Widget _buildChatInputView(_ViewModel viewModel) {
     return Row(
       children: [
+        const SizedBox(width: 20),
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-            ),
-            child: TextField(
-              enabled: !viewModel.sending,
-              textCapitalization: TextCapitalization.sentences,
-              controller: viewModel.chatController,
-              decoration: const InputDecoration(
-                // border: OutlineInputBorder(),
-                hintText: 'Write a message...',
-              ),
+          child: TextField(
+            enabled: !viewModel.sending,
+            textCapitalization: TextCapitalization.sentences,
+            controller: viewModel.chatController,
+            decoration: const InputDecoration(
+              // border: OutlineInputBorder(),
+              hintText: 'Write a message...',
             ),
           ),
         ),
@@ -126,10 +160,11 @@ class _ChatView extends StatelessWidget {
               : IconButton(
                   onPressed: viewModel.chatController.text.isEmpty
                       ? null
-                      : viewModel.askQuestion,
+                      : viewModel.sendMessage,
                   icon: const Icon(Icons.send_rounded),
                 ),
         ),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -257,8 +292,8 @@ class _ViewModel extends ViewModel {
   late final chatController = TextEditingController()
     ..addListener(notifyListeners);
 
-  final _chats = <Chat>[];
-  List<Chat> get chats => List.unmodifiable(_chats.reversed);
+  final _messages = <Message>[];
+  List<Message> get messages => List.unmodifiable(_messages.reversed);
 
   bool _sending = false;
   bool get sending => _sending;
@@ -273,17 +308,21 @@ class _ViewModel extends ViewModel {
     notifyListeners();
   }
 
-  Future<void> askQuestion() async {
+  Future<void> sendMessage() async {
     final content = chatController.text;
-    final question = Chat(role: Role.user, content: content);
-    _chats.add(question);
+    final question = Message(
+      role: Role.user,
+      content: content,
+      date: DateTime.now(),
+    );
+    _messages.add(question);
     chatController.text = '';
     _sending = true;
 
     notifyListeners();
 
-    final answer = await api.ask(_chats);
-    _chats.add(answer);
+    final answer = await api.send(_messages);
+    _messages.add(answer);
     _sending = false;
     notifyListeners();
   }
