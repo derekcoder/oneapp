@@ -14,7 +14,7 @@ class SubappRepository extends ChangeNotifier {
     _subapps.addAll([
       ChatGPTSubapp(
         name: 'Chat-GPT',
-        color: Colors.blueAccent,
+        color: Colors.black,
       ),
     ]);
   }
