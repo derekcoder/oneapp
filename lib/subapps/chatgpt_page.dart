@@ -155,8 +155,8 @@ class _ChatView extends StatelessWidget {
             enabled: !viewModel.sending,
             textCapitalization: TextCapitalization.sentences,
             controller: viewModel.chatController,
+            onSubmitted: (value) async => await viewModel.sendMessage(value),
             decoration: const InputDecoration(
-              // border: OutlineInputBorder(),
               hintText: 'Write a message...',
             ),
           ),
@@ -168,7 +168,10 @@ class _ChatView extends StatelessWidget {
               : IconButton(
                   onPressed: viewModel.chatController.text.isEmpty
                       ? null
-                      : viewModel.sendMessage,
+                      : () async {
+                          final content = viewModel.chatController.text;
+                          await viewModel.sendMessage(content);
+                        },
                   icon: const Icon(Icons.send_rounded),
                 ),
         ),
@@ -318,9 +321,7 @@ class _ViewModel extends ViewModel {
     notifyListeners();
   }
 
-  Future<void> sendMessage() async {
-    final content = chatController.text;
-
+  Future<void> sendMessage(String content) async {
     final message = Message(
       role: Role.user,
       content: content,
