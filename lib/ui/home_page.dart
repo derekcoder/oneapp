@@ -14,23 +14,25 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('OneTool'),
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: MediaQuery.of(context).size.width / 90,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-        ),
-        itemCount: subapps.length,
-        itemBuilder: (context, index) => _SubappTile(
-          subapp: subapps[index],
-          onTap: () {
-            final route = MaterialPageRoute(
-              builder: (_) => subapps[index].homePage,
-            );
-            Navigator.push(context, route);
-          },
+      body: SafeArea(
+        child: GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: MediaQuery.of(context).size.width / 90,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+          ),
+          itemCount: subapps.length,
+          itemBuilder: (context, index) => _SubappTile(
+            subapp: subapps[index],
+            onTap: () {
+              final route = MaterialPageRoute(
+                builder: (_) => subapps[index].homePage,
+              );
+              Navigator.push(context, route);
+            },
+          ),
         ),
       ),
     );

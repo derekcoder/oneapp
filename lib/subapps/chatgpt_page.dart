@@ -47,9 +47,11 @@ class _ChatgptView extends StatelessWidget {
                 ),
             ],
           ),
-          body: viewModel.apiKey.isEmpty
-              ? const _SetApiKeyView()
-              : const _ChatView(),
+          body: SafeArea(
+            child: viewModel.apiKey.isEmpty
+                ? const _SetApiKeyView()
+                : const _ChatView(),
+          ),
         );
       },
     );
@@ -65,64 +67,70 @@ class _ChatView extends StatelessWidget {
       builder: (context, viewModel, _) {
         return Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                    ),
-                    child: TextField(
-                      enabled: !viewModel.sending,
-                      textCapitalization: TextCapitalization.sentences,
-                      controller: viewModel.chatController,
-                      decoration: const InputDecoration(
-                        // border: OutlineInputBorder(),
-                        hintText: 'Write a message...',
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  child: viewModel.sending
-                      ? const CupertinoActivityIndicator()
-                      : IconButton(
-                          onPressed: viewModel.chatController.text.isEmpty
-                              ? null
-                              : viewModel.askQuestion,
-                          icon: const Icon(Icons.send_rounded),
-                        ),
-                ),
-              ],
-            ),
-            // const Divider(),
+            _buildChatInputView(viewModel),
             Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                itemCount: viewModel.chats.length,
-                itemBuilder: (context, index) {
-                  final chat = viewModel.chats[index];
-                  return ListTile(
-                    leading: SizedBox(
-                      width: 70,
-                      child: Text(
-                        chat.role.name,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    title: Text(chat.content),
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) =>
-                    const Divider(),
-              ),
+              child: _buildChatConversationsList(viewModel),
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildChatConversationsList(_ViewModel viewModel) {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemCount: viewModel.chats.length,
+      itemBuilder: (context, index) {
+        final chat = viewModel.chats[index];
+        return ListTile(
+          leading: SizedBox(
+            width: 70,
+            child: Text(
+              chat.role.name,
+              style: TextStyle(
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          title: Text(chat.content),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    );
+  }
+
+  Widget _buildChatInputView(_ViewModel viewModel) {
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+            ),
+            child: TextField(
+              enabled: !viewModel.sending,
+              textCapitalization: TextCapitalization.sentences,
+              controller: viewModel.chatController,
+              decoration: const InputDecoration(
+                // border: OutlineInputBorder(),
+                hintText: 'Write a message...',
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 40,
+          child: viewModel.sending
+              ? const CupertinoActivityIndicator()
+              : IconButton(
+                  onPressed: viewModel.chatController.text.isEmpty
+                      ? null
+                      : viewModel.askQuestion,
+                  icon: const Icon(Icons.send_rounded),
+                ),
+        ),
+      ],
     );
   }
 }
@@ -138,85 +146,99 @@ class _SetApiKeyView extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              Text(
-                'Welcome to Chat-GPT bot. You need a Chat-GPT API key to continue.',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: viewModel.apiKeyController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'sk-******************',
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(6),
-                  ),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Expanded(
+                child: ListView(
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        children: [
-                          const TextSpan(text: '1. Open '),
-                          TextSpan(
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                await launchUrl(
-                                  Uri.parse(
-                                      'https://platform.openai.com/account/api-keys'),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              },
-                            text:
-                                'https://platform.openai.com/account/api-keys',
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 20),
                     Text(
-                      '2. Click "Create new secret key"',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      'Welcome to Chat-GPT bot. You need a Chat-GPT API key to continue.',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '3. Copy & Paste your API key',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
+                    const SizedBox(height: 20),
+                    _buildApiKeyTextField(viewModel),
+                    const SizedBox(height: 20),
+                    _buildInstructionView(context),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: viewModel.apiKeyController.text.isEmpty
-                      ? null
-                      : viewModel.setApiKey,
-                  child: const Text('Continue'),
-                ),
-              ),
+              _buildContinueButton(viewModel),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildApiKeyTextField(_ViewModel viewModel) {
+    return TextField(
+      controller: viewModel.apiKeyController,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'sk-******************',
+      ),
+    );
+  }
+
+  Widget _buildInstructionView(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: const BorderRadius.all(
+          Radius.circular(6),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyLarge,
+              children: [
+                const TextSpan(text: '1. Open '),
+                TextSpan(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () async {
+                      await launchUrl(
+                        Uri.parse(
+                            'https://platform.openai.com/account/api-keys'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  text: 'https://platform.openai.com/account/api-keys',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '2. Click "Create new secret key"',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '3. Copy & Paste your API key',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContinueButton(_ViewModel viewModel) {
+    return SizedBox(
+      width: double.infinity,
+      height: 44,
+      child: ElevatedButton(
+        onPressed: viewModel.apiKeyController.text.isEmpty
+            ? null
+            : viewModel.setApiKey,
+        child: const Text('Continue'),
+      ),
     );
   }
 }
