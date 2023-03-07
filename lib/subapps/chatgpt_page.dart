@@ -117,7 +117,7 @@ class _ChatView extends StatelessWidget {
                     DateFormat.Hms().format(message.date),
                     style: Theme.of(context)
                         .textTheme
-                        .bodyText2
+                        .bodyMedium
                         ?.copyWith(color: Colors.grey),
                   ),
                   const Spacer(),
@@ -154,8 +154,14 @@ class _ChatView extends StatelessWidget {
           child: TextField(
             enabled: !viewModel.sending,
             textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.send,
             controller: viewModel.chatController,
-            onSubmitted: (value) async => await viewModel.sendMessage(value),
+            onSubmitted: (value) async {
+              final content = value.trim();
+              if (content.isNotEmpty) {
+                await viewModel.sendMessage(content);
+              }
+            },
             decoration: const InputDecoration(
               hintText: 'Write a message...',
             ),
@@ -166,11 +172,13 @@ class _ChatView extends StatelessWidget {
           child: viewModel.sending
               ? const CupertinoActivityIndicator()
               : IconButton(
-                  onPressed: viewModel.chatController.text.isEmpty
+                  onPressed: viewModel.chatController.text.trim().isEmpty
                       ? null
                       : () async {
-                          final content = viewModel.chatController.text;
-                          await viewModel.sendMessage(content);
+                          final content = viewModel.chatController.text.trim();
+                          if (content.isNotEmpty) {
+                            await viewModel.sendMessage(content);
+                          }
                         },
                   icon: const Icon(Icons.send_rounded),
                 ),
@@ -322,6 +330,8 @@ class _ViewModel extends ViewModel {
   }
 
   Future<void> sendMessage(String content) async {
+    chatController.text = '';
+
     final message = Message(
       role: Role.user,
       content: content,
@@ -329,7 +339,6 @@ class _ViewModel extends ViewModel {
     );
 
     _messages.add(message);
-    chatController.text = '';
     _sending = true;
     notifyListeners();
 
