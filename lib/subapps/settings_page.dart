@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/subapps/view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -30,23 +32,80 @@ class _SettingsView extends StatelessWidget {
       ),
       body: Consumer<_ViewModel>(
         builder: (context, viewModel, _) {
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                TextField(
-                  controller: viewModel.apiKeyController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'API KEY',
-                  ),
-                  onSubmitted: (value) => viewModel.setApiKey(value),
-                ),
-              ],
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 10),
+                  _buildApiTextField(viewModel),
+                  const SizedBox(height: 20),
+                  _buildInstructionView(context),
+                ],
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildApiTextField(_ViewModel viewModel) {
+    return TextField(
+      controller: viewModel.apiKeyController,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'API KEY',
+      ),
+      onSubmitted: (value) => viewModel.setApiKey(value),
+    );
+  }
+
+  Widget _buildInstructionView(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: const BorderRadius.all(
+          Radius.circular(6),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.bodyLarge,
+              children: [
+                const TextSpan(text: '1. Open '),
+                TextSpan(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () async {
+                      await launchUrl(
+                        Uri.parse(
+                            'https://platform.openai.com/account/api-keys'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  text: 'https://platform.openai.com/account/api-keys',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '2. Click "Create new secret key"',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '3. Copy & Paste your API key',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ],
       ),
     );
   }
