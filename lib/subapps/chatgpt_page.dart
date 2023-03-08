@@ -96,7 +96,7 @@ class _ChatView extends StatelessWidget {
 
   Widget _buildMessagesList(BuildContext context, _ViewModel viewModel) {
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       itemCount: viewModel.messages.length,
       itemBuilder: (context, index) {
         final message = viewModel.messages[index];
@@ -154,44 +154,57 @@ class _ChatView extends StatelessWidget {
   }
 
   Widget _buildChatInputView(_ViewModel viewModel) {
-    return Row(
-      children: [
-        const SizedBox(width: 20),
-        Expanded(
-          child: TextField(
-            enabled: !viewModel.sending,
-            textCapitalization: TextCapitalization.sentences,
-            textInputAction: TextInputAction.send,
-            controller: viewModel.chatController,
-            onSubmitted: (value) async {
-              final content = value.trim();
-              if (content.isNotEmpty) {
-                await viewModel.sendMessage(content);
-              }
-            },
-            decoration: const InputDecoration(
-              hintText: 'Write a message...',
+    return Container(
+      margin: const EdgeInsets.only(left: 6, right: 6, top: 6),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey[400]!,
+        ),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(4),
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              enabled: !viewModel.sending,
+              textCapitalization: TextCapitalization.sentences,
+              textInputAction: TextInputAction.send,
+              controller: viewModel.chatController,
+              onSubmitted: (value) async {
+                final content = value.trim();
+                if (content.isNotEmpty) {
+                  await viewModel.sendMessage(content);
+                }
+              },
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Write a message...',
+              ),
             ),
           ),
-        ),
-        SizedBox(
-          width: 40,
-          child: viewModel.sending
-              ? const CupertinoActivityIndicator()
-              : IconButton(
-                  onPressed: viewModel.chatController.text.trim().isEmpty
-                      ? null
-                      : () async {
-                          final content = viewModel.chatController.text.trim();
-                          if (content.isNotEmpty) {
-                            await viewModel.sendMessage(content);
-                          }
-                        },
-                  icon: const Icon(Icons.send_rounded),
-                ),
-        ),
-        const SizedBox(width: 8),
-      ],
+          SizedBox(
+            width: 40,
+            child: viewModel.sending
+                ? const CupertinoActivityIndicator()
+                : IconButton(
+                    onPressed: viewModel.chatController.text.trim().isEmpty
+                        ? null
+                        : () async {
+                            final content =
+                                viewModel.chatController.text.trim();
+                            if (content.isNotEmpty) {
+                              await viewModel.sendMessage(content);
+                            }
+                          },
+                    icon: const Icon(Icons.send_rounded),
+                  ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
     );
   }
 }
