@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
-          title: 'OneTool',
+          title: 'OneChat',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primarySwatch: Colors.green,
