@@ -44,6 +44,13 @@ class _ChatgptView extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Chat-GPT'),
+            leading: viewModel.apiKey.isEmpty
+                ? null
+                : IconButton(
+                    onPressed:
+                        viewModel.messages.isEmpty ? null : viewModel.clear,
+                    icon: const Icon(Icons.delete),
+                  ),
             actions: [
               if (viewModel.apiKey.isNotEmpty)
                 IconButton(
@@ -326,6 +333,11 @@ class _ViewModel extends ViewModel {
     appPref.apiKey = apiKey;
     api.updateApiKey(apiKey);
 
+    notifyListeners();
+  }
+
+  void clear() {
+    _messages.clear();
     notifyListeners();
   }
 

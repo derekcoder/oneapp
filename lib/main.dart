@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
-import 'package:oneapp/ui/home_page.dart';
+import 'package:oneapp/subapps/chatgpt_page.dart';
 import 'package:oneapp/repositories/subapp_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
             ),
             scaffoldBackgroundColor: Colors.grey[200],
           ),
-          home: const HomePage(),
+          home: const ChatgptPage(),
         );
       }),
     );
