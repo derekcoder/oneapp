@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:oneapp/models/message.dart';
 
 import 'backend_query.dart';

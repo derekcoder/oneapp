@@ -9,6 +9,7 @@ class HttpHeaders {
   static const authorizationKey = 'Authorization';
   static const acceptKey = 'Accept';
   static const contentTypeKey = 'Content-Type';
+  static const acceptLanguageKey = 'Accept-Language';
 }
 
 class HttpHeaderValues {
@@ -56,12 +57,14 @@ class BackendQuery {
           HttpHeaders.authorizationKey: 'Bearer $apiKey',
           HttpHeaders.acceptKey: HttpHeaderValues.appJson,
           HttpHeaders.contentTypeKey: HttpHeaderValues.appJson,
+          HttpHeaders.acceptLanguageKey: 'en-SG,en-GB;q=0.9,en;q=0.8',
           ...?additionalHeaders,
         },
         body: jsonEncode(parameters),
       );
       _validateHttpResponse(response);
-      return _decodeResponse(response.body);
+      final decodedString = const Utf8Decoder().convert(response.bodyBytes);
+      return _decodeResponse(decodedString);
     } on SocketException catch (e) {
       throw BackendException(
         type: BackendExceptionType.networkIssue,
