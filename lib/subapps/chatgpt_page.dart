@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:oneapp/models/message.dart';
 import 'package:oneapp/services/backend/backend_exception.dart';
@@ -144,7 +145,7 @@ class _ChatView extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(message.content.trim()),
+              MarkdownBody(data: message.content.trim()),
             ],
           ),
         );
