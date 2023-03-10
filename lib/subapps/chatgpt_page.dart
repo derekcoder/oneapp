@@ -97,30 +97,25 @@ class _ChatView extends StatelessWidget {
 
   Widget _buildMessagesList(BuildContext context, _ViewModel viewModel) {
     return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      controller: viewModel.scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 4),
       itemCount: viewModel.messages.length,
       itemBuilder: (context, index) {
         final message = viewModel.messages[index];
         return ListTile(
-          leading: SizedBox(
-            width: 64,
-            child: Column(
-              children: [
-                const SizedBox(height: 4),
-                Text(
-                  message.role.name,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
+                  Text(
+                    message.role.name,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const Text(' · '),
                   Text(
                     DateFormat.Hms().format(message.date),
                     style: Theme.of(context)
@@ -145,7 +140,19 @@ class _ChatView extends StatelessWidget {
                   ),
                 ],
               ),
-              MarkdownBody(data: message.content.trim()),
+              MarkdownBody(
+                data: message.content.trim(),
+                styleSheet: MarkdownStyleSheet(
+                  p: Theme.of(context).textTheme.bodyText2,
+                  codeblockPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  codeblockDecoration: BoxDecoration(
+                    color: Theme.of(context).cardTheme.color ??
+                        Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
             ],
           ),
         );
@@ -334,6 +341,19 @@ class _ViewModel extends ViewModel {
   late final chatController = TextEditingController()
     ..addListener(notifyListeners);
 
+  final scrollController = ScrollController();
+
+  void scrollToTop() {
+    if (scrollController.hasClients) {
+      final position = scrollController.position.minScrollExtent;
+      scrollController.animateTo(
+        position,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   final _messages = <Message>[];
   List<Message> get messages => List.unmodifiable(_messages.reversed);
 
@@ -368,6 +388,8 @@ class _ViewModel extends ViewModel {
     _sending = true;
     notifyListeners();
 
+    scrollToTop();
+
     final answer = await _send(_messages);
 
     if (answer != null) {
@@ -375,6 +397,8 @@ class _ViewModel extends ViewModel {
     }
     _sending = false;
     notifyListeners();
+
+    scrollToTop();
   }
 
   Future<Message?> _send(List<Message> messages) async {
