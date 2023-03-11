@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -7,10 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:oneapp/models/message.dart';
 import 'package:oneapp/services/backend/backend_exception.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
-import 'package:oneapp/services/preference/app_preference.dart';
 import 'package:oneapp/subapps/shared_components/view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ChatgptPage extends StatelessWidget {
   const ChatgptPage({super.key});
@@ -19,7 +16,6 @@ class ChatgptPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => _ViewModel(
-        appPref: context.read<AppPreference>(),
         api: context.read<ChatgptApi>(),
       ),
       child: const _ChatgptView(),
@@ -43,19 +39,18 @@ class _ChatgptView extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Chat-GPT'),
-            leading: viewModel.apiKey.isEmpty
-                ? null
-                : IconButton(
-                    onPressed:
-                        viewModel.messages.isEmpty ? null : viewModel.clear,
-                    icon: const Icon(Icons.delete),
-                  ),
+            title: const Text('Casual Chat'),
+            leading: IconButton(
+              onPressed: viewModel.messages.isEmpty ? null : viewModel.clear,
+              icon: const Icon(Icons.delete),
+            ),
           ),
-          body: SafeArea(
-            child: viewModel.apiKey.isEmpty
-                ? const _SetApiKeyView()
-                : const _ChatView(),
+          body: const SafeArea(
+            child: _ChatView(),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.add),
           ),
         );
       },
@@ -204,132 +199,19 @@ class _ChatView extends StatelessWidget {
   }
 }
 
-class _SetApiKeyView extends StatelessWidget {
-  const _SetApiKeyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<_ViewModel>(
-      builder: (context, viewModel, _) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      'Welcome to Chat-GPT bot. You need a Chat-GPT API key to continue.',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildApiKeyTextField(viewModel),
-                    const SizedBox(height: 20),
-                    _buildInstructionView(context),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-              _buildContinueButton(viewModel),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildApiKeyTextField(_ViewModel viewModel) {
-    return TextField(
-      controller: viewModel.apiKeyController,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'sk-******************',
-      ),
-    );
-  }
-
-  Widget _buildInstructionView(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: const BorderRadius.all(
-          Radius.circular(6),
-        ),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyLarge,
-              children: [
-                const TextSpan(text: '1. Open '),
-                TextSpan(
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () async {
-                      await launchUrl(
-                        Uri.parse(
-                            'https://platform.openai.com/account/api-keys'),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    },
-                  text: 'https://platform.openai.com/account/api-keys',
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '2. Click "Create new secret key"',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '3. Copy & Paste your API key',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContinueButton(_ViewModel viewModel) {
-    return SizedBox(
-      width: double.infinity,
-      height: 44,
-      child: ElevatedButton(
-        onPressed: viewModel.apiKeyController.text.isEmpty
-            ? null
-            : viewModel.setApiKey,
-        child: const Text('Continue'),
-      ),
-    );
-  }
-}
-
 class _ViewModel extends ViewModel {
   _ViewModel({
-    required this.appPref,
     required this.api,
   });
 
-  final AppPreference appPref;
   final ChatgptApi api;
 
   void Function(String)? onApiIssue;
 
-  late final apiKeyController = TextEditingController()
-    ..addListener(notifyListeners);
   late final chatController = TextEditingController()
     ..addListener(notifyListeners);
 
   final scrollController = ScrollController();
-
   void scrollToTop() {
     if (scrollController.hasClients) {
       final position = scrollController.position.minScrollExtent;
@@ -346,16 +228,6 @@ class _ViewModel extends ViewModel {
 
   bool _sending = false;
   bool get sending => _sending;
-
-  String get apiKey => appPref.apiKey;
-
-  void setApiKey() {
-    final apiKey = apiKeyController.text;
-    appPref.apiKey = apiKey;
-    api.updateApiKey(apiKey);
-
-    notifyListeners();
-  }
 
   void clear() {
     _messages.clear();

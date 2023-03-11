@@ -1,48 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:oneapp/subapps/chatgpt/chatgpt_page.dart';
-import 'package:oneapp/subapps/chatgpt/settings_page.dart';
+import 'package:oneapp/services/preference/app_preference.dart';
+import 'package:oneapp/subapps/chatgpt/chatgpt_apikey_page.dart';
+import 'package:oneapp/subapps/chatgpt/chatgpt_home_viewmodel.dart';
+import 'package:provider/provider.dart';
 
-class ChatgptHomePage extends StatefulWidget {
+class ChatgptHomePage extends StatelessWidget {
   const ChatgptHomePage({super.key});
-
-  static const chatPage = ChatgptPage();
-  static const settingsPage = SettingsPage();
-
-  @override
-  State<ChatgptHomePage> createState() => _ChatgptHomePageState();
-}
-
-class _ChatgptHomePageState extends State<ChatgptHomePage> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          ChatgptHomePage.chatPage,
-          ChatgptHomePage.settingsPage
-        ],
+    return ChangeNotifierProvider(
+      create: (context) => ChatgotHomeViewModel(
+        appPref: context.read<AppPreference>(),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            label: 'Chat-GPT',
-            icon: Icon(Icons.chat_bubble_rounded),
-          ),
-          BottomNavigationBarItem(
-            label: 'Settings',
-            icon: Icon(Icons.settings),
-          ),
-        ],
-      ),
+      child: const _ChatgptHomeView(),
     );
+  }
+}
+
+class _ChatgptHomeView extends StatelessWidget {
+  const _ChatgptHomeView();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ChatgotHomeViewModel>(builder: (context, viewModel, _) {
+      return Scaffold(
+        body: viewModel.isApiKeySaved
+            ? IndexedStack(
+                index: viewModel.currentIndex,
+                children: ChatgotHomeViewModel.pages,
+              )
+            : const ChatgptApiKeyPage(),
+        bottomNavigationBar: viewModel.isApiKeySaved
+            ? BottomNavigationBar(
+                currentIndex: viewModel.currentIndex,
+                onTap: (index) => viewModel.currentIndex = index,
+                items: ChatgotHomeViewModel.navBarItems,
+              )
+            : null,
+      );
+    });
   }
 }
