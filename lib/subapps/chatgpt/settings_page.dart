@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
-import 'package:oneapp/subapps/view_model.dart';
+import 'package:oneapp/subapps/shared_components/view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 

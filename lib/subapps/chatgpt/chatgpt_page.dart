@@ -8,8 +8,7 @@ import 'package:oneapp/models/message.dart';
 import 'package:oneapp/services/backend/backend_exception.dart';
 import 'package:oneapp/services/backend/chatgpt_api.dart';
 import 'package:oneapp/services/preference/app_preference.dart';
-import 'package:oneapp/subapps/settings_page.dart';
-import 'package:oneapp/subapps/view_model.dart';
+import 'package:oneapp/subapps/shared_components/view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -52,18 +51,6 @@ class _ChatgptView extends StatelessWidget {
                         viewModel.messages.isEmpty ? null : viewModel.clear,
                     icon: const Icon(Icons.delete),
                   ),
-            actions: [
-              if (viewModel.apiKey.isNotEmpty)
-                IconButton(
-                  onPressed: () {
-                    final route = MaterialPageRoute(
-                      builder: (_) => const SettingsPage(),
-                    );
-                    Navigator.push(context, route);
-                  },
-                  icon: const Icon(Icons.settings),
-                ),
-            ],
           ),
           body: SafeArea(
             child: viewModel.apiKey.isEmpty
