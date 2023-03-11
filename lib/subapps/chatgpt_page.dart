@@ -426,4 +426,30 @@ class _ViewModel extends ViewModel {
 
     return null;
   }
+
+  Future<Message?> _translate(Message message) async {
+    try {
+      final answer = await api.translate(message);
+      return answer;
+    } on BackendException catch (e) {
+      final String message;
+      switch (e.type) {
+        case BackendExceptionType.networkIssue:
+          message = 'Got an internet issue';
+          break;
+        case BackendExceptionType.unauthorized:
+          message = 'Unauthorized';
+          break;
+        case BackendExceptionType.internalError:
+          message = 'Something errors happen in server';
+          break;
+        case BackendExceptionType.unknown:
+          message = 'There is unknown error';
+          break;
+      }
+      onApiIssue?.call(message);
+    }
+
+    return null;
+  }
 }
